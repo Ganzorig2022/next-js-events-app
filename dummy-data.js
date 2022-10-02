@@ -44,7 +44,12 @@ export function getFilteredEvents(dateFilter) {
   const { year, month } = dateFilter;
 
   let filteredEvents = DUMMY_EVENTS.filter((event) => {
+    // console.log(event.date); //2021-05-12
+    // console.log(new Date(event.date)); //Wed May 12 2021 08:00:00 GMT+0800 (Ulaanbaatar Standard Time)
+    // console.log(eventDate.getMonth()); 4 = May
+    // console.log(eventDate.getFullYear()); 2021, 2022
     const eventDate = new Date(event.date);
+
     return (
       eventDate.getFullYear() === year && eventDate.getMonth() === month - 1
     );

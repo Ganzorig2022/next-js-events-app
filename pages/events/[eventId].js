@@ -1,11 +1,11 @@
 import { Fragment } from 'react';
 // import { useRouter } from 'next/router';
 
-import { getEventById, getAllEvents } from '../../dummy-data';
+import { getEventById, getFeaturedEvents } from '../../dummy-data';
 import EventSummary from '../../components/event-detail/event-summary';
 import EventLogistics from '../../components/event-detail/event-logistics';
 import EventContent from '../../components/event-detail/event-content';
-import ErrorAlert from '../../components/ui/error-alert';
+// import ErrorAlert from '../../components/ui/error-alert';
 
 function EventDetailPage(props) {
   // const router = useRouter();
@@ -15,9 +15,9 @@ function EventDetailPage(props) {
 
   if (!event) {
     return (
-      <ErrorAlert>
-        <p>No event found!</p>
-      </ErrorAlert>
+      <div className='center'>
+        <p>Loading...</p>
+      </div>
     );
   }
 
@@ -47,12 +47,13 @@ export const getStaticProps = async (context) => {
     props: {
       selectedEvent: event,
     },
+    revalidate: 30, //30sec tutamd database shinechlegdsen esehiig shalgana.
   };
 };
 
 //=================Which event params.id============================
 export const getStaticPaths = async () => {
-  const events = getAllEvents();
+  const events = getFeaturedEvents();
 
   //events array-aas id-uudaar ni paths[] uusgeh
   const paths = events.map((event) => ({
@@ -61,7 +62,8 @@ export const getStaticPaths = async () => {
 
   return {
     paths: paths, // id ni bwal huudas ruuga vserne.
-    fallback: false, //oor id-rvv vserwel 404.
+    fallback: true,
+    // fallback: false, //oor id-rvv vserwel 404.
   };
 };
 

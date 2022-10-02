@@ -1,35 +1,26 @@
 import { Fragment } from 'react';
-import { useRouter } from 'next/router';
-
 import { getFilteredEvents } from '../../dummy-data';
 import EventList from '../../components/events/event-list';
 import ResultsTitle from '../../components/events/results-title';
 import Button from '../../components/ui/button';
 import ErrorAlert from '../../components/ui/error-alert';
+// import { useRouter } from 'next/router';
 
-function FilteredEventsPage() {
-  const router = useRouter();
+const FilteredEventsPage = (props) => {
+  //=============Client Side Rendering================
+  // const router = useRouter()
+  // const filteredData = router.query.slug
+  // if (!filteredData) {
+  //   return <p className='center'>Loading...</p>
+  // }
+  // const filteredYear = filterData[0]; //2021
+  // const filteredMonth = filterData[1]; //1 buyu 1-r sar
 
-  const filterData = router.query.slug;
+  // //string to number
+  // const numYear = +filteredYear;
+  // const numMonth = +filteredMonth;
 
-  if (!filterData) {
-    return <p className='center'>Loading...</p>;
-  }
-
-  const filteredYear = filterData[0];
-  const filteredMonth = filterData[1];
-
-  const numYear = +filteredYear;
-  const numMonth = +filteredMonth;
-
-  if (
-    isNaN(numYear) ||
-    isNaN(numMonth) ||
-    numYear > 2030 ||
-    numYear < 2021 ||
-    numMonth < 1 ||
-    numMonth > 12
-  ) {
+  if (props.hasError) {
     return (
       <Fragment>
         <ErrorAlert>
@@ -42,10 +33,7 @@ function FilteredEventsPage() {
     );
   }
 
-  const filteredEvents = getFilteredEvents({
-    year: numYear,
-    month: numMonth,
-  });
+  const filteredEvents = props.events;
 
   if (!filteredEvents || filteredEvents.length === 0) {
     return (
@@ -60,7 +48,7 @@ function FilteredEventsPage() {
     );
   }
 
-  const date = new Date(numYear, numMonth - 1);
+  const date = new Date(props.date.numYear, props.date.numMonth - 1);
 
   return (
     <Fragment>
@@ -68,6 +56,52 @@ function FilteredEventsPage() {
       <EventList items={filteredEvents} />
     </Fragment>
   );
-}
+};
 
+//======================Server Side Rendering (SSR)==========================
+export const getServerSideProps = async (context) => {
+  const { params } = context;
+
+  //params.slug ni "http://localhost:3000/events/2021/1" ene url-aas zadlaad["2021", "1"] gesen array butsaana.
+  const filterData = params.slug;
+
+  const filteredYear = filterData[0]; //2021
+  const filteredMonth = filterData[1]; //1 buyu 1-r sar
+
+  //string to number
+  const numYear = +filteredYear;
+  const numMonth = +filteredMonth;
+
+  //validation
+  if (
+    isNaN(numYear) ||
+    isNaN(numMonth) ||
+    numYear > 2030 ||
+    numYear < 2021 ||
+    numMonth < 1 ||
+    numMonth > 12
+  ) {
+    return {
+      props: { hasError: true },
+      // notFound: true,
+      // redirect: {
+      //   destination: '/error',
+      // },
+    };
+  }
+
+  const filteredEvents = getFilteredEvents({
+    year: numYear,
+    month: numMonth,
+  });
+  return {
+    props: {
+      events: filteredEvents,
+      date: {
+        year: numYear,
+        month: numMonth,
+      },
+    },
+  };
+};
 export default FilteredEventsPage;
